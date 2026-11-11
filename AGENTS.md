@@ -1,8 +1,7 @@
 # Development instructions
 
 Read README.md, docs/architecture.md, and all applicable ADRs before changes.
-Platform implementation is deferred until the complete core/CLI cycle is verified;
-current changes are limited to related contracts and development instructions. ADRs remain proposed until explicit maintainer acceptance after
+The complete core/CLI cycle has been verified for one trusted pipeline. The current platform implementation is a local read-only API and web prototype for one user. ADRs remain proposed until explicit maintainer acceptance after
 independent review; implementing a prototype does not change status.
 
 ## Roles and change ownership

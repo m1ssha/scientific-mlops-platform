@@ -75,15 +75,22 @@ func Listen(address string) (net.Listener, error) {
 	}
 	return net.Listen("tcp", address)
 }
+
+// Allowed applies the same authority boundary to API and static resources.
+func Allowed(r *http.Request, authority string) bool {
+	if r.Host != authority || len(r.Header.Values("Origin")) > 1 {
+		return false
+	}
+	if _, ok := r.Header["Origin"]; ok && r.Header.Get("Origin") == "" {
+		return false
+	}
+	return r.Header.Get("Origin") == "" || r.Header.Get("Origin") == "http://"+authority
+}
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	if r.Host != s.authority || len(r.Header.Values("Origin")) > 1 || (r.Header.Get("Origin") != "" && r.Header.Get("Origin") != "http://"+s.authority) {
-		fail(w, 403, "forbidden")
-		return
-	}
-	if _, ok := r.Header["Origin"]; ok && r.Header.Get("Origin") == "" {
+	if !Allowed(r, s.authority) {
 		fail(w, 403, "forbidden")
 		return
 	}
