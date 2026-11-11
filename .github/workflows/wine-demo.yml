@@ -1,0 +1,34 @@
+name: Wine demo
+on:
+  push:
+  pull_request:
+jobs:
+  wine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci && npm test && npm run build
+        working-directory: web
+      - run: npx playwright install --with-deps chromium
+        working-directory: web
+      - name: Reconstruct historical Wine data from pinned core Git objects
+        run: python3 tools/wine_demo.py --work "$RUNNER_TEMP/wine-demo" > "$RUNNER_TEMP/demo-output.json"
+      - run: python3 -m unittest discover -s tools -p 'test_*.py' -v
+        env:
+          WINE_CORE_SOURCE: ${{ runner.temp }}/wine-demo/core
+      - run: go build -o "$RUNNER_TEMP/platform" ./cmd/platform
+      - name: Check production UI and API on Wine, empty and missing catalogs
+        working-directory: web
+        env:
+          WINE_WORK: ${{ runner.temp }}/wine-demo
+          WINE_PLATFORM: ${{ runner.temp }}/platform
+          UI_EVIDENCE_DIR: ${{ runner.temp }}/wine-evidence
+        run: node scripts/wine-smoke.mjs
