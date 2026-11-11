@@ -115,3 +115,28 @@ func TestAPIErrorContractWithWeb(t *testing.T) {
 		}
 	}
 }
+
+func TestHiddenSymlinkRejected(t *testing.T) {
+	d := t.TempDir()
+	if e := os.WriteFile(filepath.Join(d, "index.html"), []byte("ok"), 0600); e != nil {
+		t.Fatal(e)
+	}
+	if e := os.Symlink("index.html", filepath.Join(d, ".hidden")); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := New(d, "x", http.NotFoundHandler()); e == nil {
+		t.Fatal("hidden symlink accepted")
+	}
+	if e := os.Remove(filepath.Join(d, ".hidden")); e != nil {
+		t.Fatal(e)
+	}
+	if e := os.Mkdir(filepath.Join(d, ".hidden-dir"), 0700); e != nil {
+		t.Fatal(e)
+	}
+	if e := os.Symlink("../index.html", filepath.Join(d, ".hidden-dir", "link")); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := New(d, "x", http.NotFoundHandler()); e == nil {
+		t.Fatal("symlink in hidden directory accepted")
+	}
+}

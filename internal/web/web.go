@@ -40,16 +40,13 @@ func New(dir, authority string, apiHandler http.Handler) (http.Handler, error) {
 		if err != nil {
 			return err
 		}
-		for _, part := range strings.Split(filepath.ToSlash(rel), "/") {
-			if strings.HasPrefix(part, ".") {
-				if entry.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-		}
 		if entry.Type()&os.ModeSymlink != 0 {
 			return errors.New("symlink in web directory")
+		}
+		for _, part := range strings.Split(filepath.ToSlash(rel), "/") {
+			if strings.HasPrefix(part, ".") {
+				return nil
+			}
 		}
 		if entry.IsDir() {
 			return nil

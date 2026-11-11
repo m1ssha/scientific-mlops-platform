@@ -11,7 +11,7 @@ export class App {
   constructor(@Inject(ChangeDetectorRef) private readonly cdr: ChangeDetectorRef) { void this.refresh(); }
   async refresh() {
     const gen=++this.listGen; ++this.detailGen; ++this.planGen; ++this.diffGen;
-    this.runs=[]; this.cursor=null; this.view=null; this.selected=''; this.left=''; this.right=''; this.detail=null; this.plan=null; this.diff=null; this.detailState=''; this.planState=''; this.diffState=''; this.listState='loading'; this.error='';
+    this.repository=null; this.runs=[]; this.cursor=null; this.view=null; this.selected=''; this.left=''; this.right=''; this.detail=null; this.plan=null; this.diff=null; this.detailState=''; this.planState=''; this.diffState=''; this.listState='loading'; this.error='';
     try { const [repo,page]=await Promise.all([get('/api/v1/repository'),get('/api/v1/runs?limit=50')]); if(gen!==this.listGen)return; checkCounter(repo['sequence']); this.repository=repo; this.applyPage(page, false); }
     catch { if(gen===this.listGen){this.listState='error';this.error='Не удалось загрузить историю.';} } finally { this.cdr.markForCheck(); }
   }
