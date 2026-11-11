@@ -1,1 +1,7 @@
+/web/node_modules/
+/web/dist/
+/web/out-tsc/
+/web/.angular/
+/web/playwright-report/
+/web/test-results/
 /platform
