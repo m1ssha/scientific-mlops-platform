@@ -5,3 +5,5 @@
 /web/playwright-report/
 /web/test-results/
 /platform
+__pycache__/
+*.pyc
